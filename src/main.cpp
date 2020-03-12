@@ -14,29 +14,55 @@
 
 using namespace Menu;
 
+// LCD
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); // Set the LCD I2C address
 
-#define encBtn 4 // button
-#define encA 5
-#define encB 6
+// Rotary encoder
+#define ENC_BUTTON 4 // button
+#define ENC_A 5
+#define ENC_B 6
+#define ENC_SENSIVITY 4
 
-Encoder encoder(5, 6);
-EncoderStream encStream(encoder, 4);
+Encoder encoder(ENC_A, ENC_B);
+EncoderStream encStream(encoder, ENC_SENSIVITY);
 
-// Todo: Implement ClickEncoderStream
-keyMap encBtn_map[] = {{-encBtn, defaultNavCodes[enterCmd].ch}};
+// Todo: Implement ClickEncoderStream for click
+keyMap encBtn_map[] = {{-ENC_BUTTON, defaultNavCodes[enterCmd].ch}};
 keyIn<1> encButton(encBtn_map);
+
+// Piezo buzzer
+#define PIN_BEEP 7
+#define BEEP_DURATION 125
+#define BEEP_PAUSE 60
 
 #define LEDPIN 13
 #define MAX_DEPTH 1
 
+void beep(int count, int freq)
+{
+    for (int i = 0; i < count; i++)
+    {
+        tone(PIN_BEEP, freq);
+        delay(BEEP_DURATION);
+        noTone(PIN_BEEP);
+        delay(BEEP_PAUSE);
+    }
+}
+
+// LED variables
 unsigned int timeOn = 1000;
 unsigned int timeOff = 500;
 
+result showEvent(eventMask e, navNode &nav, prompt &item)
+{
+    beep(1, 1976);
+    return proceed;
+}
+
 MENU(mainMenu,
      "LED blink menu",
-     Menu::doNothing,
-     Menu::noEvent,
+     showEvent,           // Menu::doNothing,
+     Menu::selFocusEvent, // Menu::noEvent,
      Menu::wrapStyle,
      FIELD(timeOn,
            "On",
@@ -82,7 +108,10 @@ void setup()
     lcd.begin(16, 2); // initialize the lcd
 }
 
-bool blink(int timeOn, int timeOff) { return millis() % (unsigned long)(timeOn + timeOff) < (unsigned long)timeOn; }
+bool blink(int timeOn, int timeOff)
+{
+    return millis() % (unsigned long)(timeOn + timeOff) < (unsigned long)timeOn;
+}
 
 void loop()
 {
