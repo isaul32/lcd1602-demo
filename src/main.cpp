@@ -8,7 +8,7 @@
 #include <menuIO/lcdOut.h>
 #include <menuIO/serialOut.h>
 #include <menuIO/serialIn.h>
-#include "encoderIn.h"
+#include "EncoderIn.h"
 #include <menuIO/keyIn.h>
 #include <menuIO/chainStream.h>
 
